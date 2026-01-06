@@ -1,4 +1,3 @@
-
 import streamlit as st  # ← FIRST LINE
 import torch
 import torch.nn as nn
@@ -13,30 +12,33 @@ import os
 st.set_page_config(page_title="🫁 CliniScan", layout="wide")
 st.title("🫁 CliniScan - Chest X-ray Analysis")
 
-# Add these two lines
-YOLO_MODEL_PATH = "yolo_best.pt"
-EFF_NET_MODEL_PATH = "efficientnet.pth"  # or whatever your EfficientNet file is named
-CLASS_NAMES = ["opacity", "consolidation", "fibrosis", "mass", "other"]
-
 @st.cache_resource
 def load_models():
-    if not os.path.exists(YOLO_MODEL_PATH):
-        st.error(f"❌ YOLO: {YOLO_MODEL_PATH}"); st.stop()
-    if not os.path.exists(EFF_NET_MODEL_PATH):
-        st.error(f"❌ EfficientNet: {EFF_NET_MODEL_PATH}"); st.stop()
+    # ✅ Hardcoded paths INSIDE function (cloud-safe)
+    yolo_path = "yolo_best.pt"
+    effnet_path = "efficientnet.pth"
     
-    detector = YOLO(YOLO_MODEL_PATH)
+    # ✅ Check files exist
+    if not os.path.exists(yolo_path):
+        st.error(f"❌ YOLO: {yolo_path} not found in repo"); st.stop()
+    if not os.path.exists(effnet_path):
+        st.error(f"❌ EfficientNet: {effnet_path} not found in repo"); st.stop()
+    
+    # ✅ YOLO model
+    detector = YOLO(yolo_path)
     st.success("✅ YOLO loaded")
     
+    # ✅ EfficientNet - CLOUD SAFE
     classifier = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
     in_features = classifier.classifier[1].in_features
     classifier.classifier[1] = nn.Linear(in_features, 5)
     
-    checkpoint = torch.load(EFF_NET_MODEL_PATH, map_location="cpu")
-    if isinstance(checkpoint, dict):
-        if 'state_dict' in checkpoint:
-            checkpoint = checkpoint['state_dict']
+    # ✅ CRITICAL: map_location='cpu' for Streamlit Cloud (no GPU)
+    checkpoint = torch.load(effnet_path, map_location='cpu')
+    if isinstance(checkpoint, dict) and 'state_dict' in checkpoint:
+        checkpoint = checkpoint['state_dict']
     
+    # ✅ Safe weight loading
     state_dict = classifier.state_dict()
     model_dict = checkpoint
     for k, v in model_dict.items():
@@ -47,7 +49,10 @@ def load_models():
     
     return classifier.eval(), detector
 
+# ✅ Load models
 classifier, detector = load_models()
+
+CLASS_NAMES = ["opacity", "consolidation", "fibrosis", "mass", "other"]
 
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
