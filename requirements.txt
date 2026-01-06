@@ -1,8 +1,0 @@
-
-streamlit
-torch
-torchvision
-ultralytics
-Pillow
-numpy
-pandas
