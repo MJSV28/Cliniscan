@@ -16,7 +16,7 @@ st.title("🫁 CliniScan - Chest X-ray Analysis")
 @st.cache_resource
 def load_models():
     yolo_path = "yolo_best.pt"      # ✅ HARDCODED
-    effnet_path = "efficientnet.pth"  # ✅ HARDCODED
+    efficientnet_path = "efficientnet_best.pt"  # ✅ HARDCODED
     
     if not os.path.exists(yolo_path):
         st.error(f"❌ YOLO: {yolo_path}"); st.stop()
