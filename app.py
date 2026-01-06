@@ -13,8 +13,9 @@ import os
 st.set_page_config(page_title="🫁 CliniScan", layout="wide")
 st.title("🫁 CliniScan - Chest X-ray Analysis")
 
-model = YOLO("yolo_best.pt")
-EFF_NET_MODEL_PATH = r"C:\Users\mjsv2\OneDrive\Desktop\cliniscan\efficientnet_best.pt"
+# Add these two lines
+YOLO_MODEL_PATH = "yolo_best.pt"
+EFF_NET_MODEL_PATH = "efficientnet.pth"  # or whatever your EfficientNet file is named
 CLASS_NAMES = ["opacity", "consolidation", "fibrosis", "mass", "other"]
 
 @st.cache_resource
