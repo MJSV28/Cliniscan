@@ -13,7 +13,7 @@ import os
 st.set_page_config(page_title="🫁 CliniScan", layout="wide")
 st.title("🫁 CliniScan - Chest X-ray Analysis")
 
-YOLO_MODEL_PATH = r"C:\Users\mjsv2\OneDrive\Desktop\cliniscan\yolo_best.pt"
+model = YOLO("yolo_best.pt")
 EFF_NET_MODEL_PATH = r"C:\Users\mjsv2\OneDrive\Desktop\cliniscan\efficientnet_best.pt"
 CLASS_NAMES = ["opacity", "consolidation", "fibrosis", "mass", "other"]
 
