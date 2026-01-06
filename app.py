@@ -1,4 +1,5 @@
-import streamlit as st  # ← FIRST LINE
+
+import streamlit as st
 import torch
 import torch.nn as nn
 import numpy as np
@@ -14,42 +15,35 @@ st.title("🫁 CliniScan - Chest X-ray Analysis")
 
 @st.cache_resource
 def load_models():
-    # ✅ Hardcoded paths INSIDE function (cloud-safe)
-    yolo_path = "yolo_best.pt"
-    effnet_path = "efficientnet.pth"
+    yolo_path = "yolo_best.pt"      # ✅ HARDCODED
+    effnet_path = "efficientnet.pth"  # ✅ HARDCODED
     
-    # ✅ Check files exist
     if not os.path.exists(yolo_path):
-        st.error(f"❌ YOLO: {yolo_path} not found in repo"); st.stop()
+        st.error(f"❌ YOLO: {yolo_path}"); st.stop()
     if not os.path.exists(effnet_path):
-        st.error(f"❌ EfficientNet: {effnet_path} not found in repo"); st.stop()
+        st.error(f"❌ EfficientNet: {effnet_path}"); st.stop()
     
-    # ✅ YOLO model
     detector = YOLO(yolo_path)
     st.success("✅ YOLO loaded")
     
-    # ✅ EfficientNet - CLOUD SAFE
     classifier = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
     in_features = classifier.classifier[1].in_features
     classifier.classifier[1] = nn.Linear(in_features, 5)
     
-    # ✅ CRITICAL: map_location='cpu' for Streamlit Cloud (no GPU)
     checkpoint = torch.load(effnet_path, map_location='cpu')
     if isinstance(checkpoint, dict) and 'state_dict' in checkpoint:
         checkpoint = checkpoint['state_dict']
     
-    # ✅ Safe weight loading
     state_dict = classifier.state_dict()
     model_dict = checkpoint
     for k, v in model_dict.items():
         if k in state_dict and state_dict[k].shape == v.shape:
             state_dict[k] = v
     classifier.load_state_dict(state_dict)
-    st.success("✅ EfficientNet loaded (5 classes)")
+    st.success("✅ EfficientNet loaded")
     
     return classifier.eval(), detector
 
-# ✅ Load models
 classifier, detector = load_models()
 
 CLASS_NAMES = ["opacity", "consolidation", "fibrosis", "mass", "other"]
